@@ -48,7 +48,7 @@ public class Client {
     private static void loadCertificate(String serverCertificatePath, String clientTrustStorePath) throws Exception {
 
         if (!Files.exists(Path.of(clientTrustStorePath)))
-            createClientTrustStore(clientTrustStorePath);
+            loadClientTrustStore(clientTrustStorePath);
 
         String alias = "wildfly18.localhost";
         String password = "changeit";
@@ -79,7 +79,7 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStorePassword", password);
     }
 
-    private static void createClientTrustStore(String clientTrustStorePath) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+    private static void loadClientTrustStore(String clientTrustStorePath) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
 
         KeyStore clientTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "changeit".toCharArray();
