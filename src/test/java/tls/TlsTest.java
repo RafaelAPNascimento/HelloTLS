@@ -9,19 +9,21 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.http.HttpClient.Version.HTTP_1_1;
 
 public class TlsTest {
 
-    private static final String CLIENT_TRUST_STORE_PATH = "/home/rafael/Library/Practice/_02_httpsLocalHost/client.truststore";
-    private static final String LOCALHOST_CERTIFICATE_PATH = "/home/rafael/Library/Practice/_02_httpsLocalHost/localhost";
+    private static final Path CLIENT_TRUST_STORE = Paths.get("/home/rafael/Library/Practice/_02_httpsLocalHost/client.truststore");
+    private static final Path LOCALHOST_CERTIFICATE = Paths.get("/home/rafael/Library/Practice/_02_httpsLocalHost/localhost");
 
     @BeforeAll
     public static void init() throws Exception {
 
-        CertificateLoader.loadCertificate(LOCALHOST_CERTIFICATE_PATH, CLIENT_TRUST_STORE_PATH);
+        CertificateLoader.loadCertificate(LOCALHOST_CERTIFICATE, CLIENT_TRUST_STORE);
     }
 
     @Test

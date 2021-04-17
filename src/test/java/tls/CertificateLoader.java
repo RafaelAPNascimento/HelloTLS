@@ -1,9 +1,6 @@
 package tls;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
@@ -15,50 +12,50 @@ import java.security.cert.CertificateFactory;
 
 public class CertificateLoader {
 
-    static void loadCertificate(String serverCertificatePath, String clientTrustStorePath) throws Exception {
+    static void loadCertificate(Path serverCertificatePath, Path clientTrustStorePath) throws Exception {
 
-        if (!Files.exists(Path.of(clientTrustStorePath)))
+        if (!Files.exists(clientTrustStorePath))
             createClientTrustStore(clientTrustStorePath);
 
-        String alias = "wildfly18.localhost";
+        String alias = "wildfly23.localhost";
         String password = "changeit";
 
         // to load a new truststore other than default cacerts
-        KeyStore clienTruststore = KeyStore.getInstance(KeyStore.getDefaultType());
-        FileInputStream in = new FileInputStream(clientTrustStorePath);
-        clienTruststore.load(in, password.toCharArray());
+        KeyStore clientTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        InputStream in = Files.newInputStream(clientTrustStorePath);
+        clientTrustStore.load(in, password.toCharArray());
         in.close();
 
         // CertficateFactory to create a new reference to the server certificate file
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
         // read the server certificate
-        InputStream serverCertstream = new FileInputStream(serverCertificatePath);
+        InputStream serverCertstream = Files.newInputStream(serverCertificatePath);
 
         // certificate instance
         Certificate serverCertificate =  cf.generateCertificate(serverCertstream);
 
         // add the server certificate to our newly truststore
-        clienTruststore.setCertificateEntry(alias, serverCertificate);
+        clientTrustStore.setCertificateEntry(alias, serverCertificate);
 
         // save modifications
-        FileOutputStream out = new FileOutputStream(clientTrustStorePath);
-        clienTruststore.store(out, password.toCharArray());
+        OutputStream out = Files.newOutputStream(clientTrustStorePath);
+        clientTrustStore.store(out, password.toCharArray());
         out.close();
 
-        // dynamically set default truststore for this application from cacerts to client.truststore
-        System.setProperty("javax.net.ssl.trustStore", clientTrustStorePath);
+        // dynamically set default truststore for this application from cacerts to newly client.truststore
+        System.setProperty("javax.net.ssl.trustStore", clientTrustStorePath.toString());
         System.setProperty("javax.net.ssl.trustStorePassword", password);
     }
 
-    private static void createClientTrustStore(String clientTrustStorePath) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+    private static void createClientTrustStore(Path clientTrustStorePath) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
 
         KeyStore clientTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "changeit".toCharArray();
 
         clientTrustStore.load(null, password);
 
-        FileOutputStream fos = new FileOutputStream(clientTrustStorePath);
+        OutputStream fos = Files.newOutputStream(clientTrustStorePath);
         clientTrustStore.store(fos, password);
         fos.close();
     }
